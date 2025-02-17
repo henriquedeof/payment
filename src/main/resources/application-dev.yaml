@@ -1,26 +1,17 @@
 spring:
-    profiles:
-        active: dev
-    application:
-        name: dl-payment-service
-
-# ================================================================================================================================
-# The configurations below are commented they were moved to the application-dev.yaml file.
-# ================================================================================================================================
-#    config:
-#        # The 'configserver:' is used to tell the application to look for the configurations in the Config Server.
-#        # The 'optional' prefix is used to tell the application that if the Config Server is not available, it should use the configurations in this application.yaml file (need to uncomment them).
-#        # import:  'optional:configserver:'
-#        import:  'configserver:'
-#    cloud:
-#        config:
-#            discovery:
-#                # The serviceId is the name of the service in the Eureka Server.
-#                serviceId: dl-config-server
-#            # The username and password are used to access the Config Server (basic authentication) as it is now using Spring Security.
-#            username: admin
-#            password: 'admin'
-
+    config:
+        # The 'configserver:' is used to tell the application to look for the configurations in the Config Server.
+        # The 'optional' prefix is used to tell the application that if the Config Server is not available, it should use the configurations in this application.yaml file (need to uncomment them).
+        # import:  'optional:configserver:'
+        import:  'configserver:'
+    cloud:
+        config:
+            discovery:
+                # The serviceId is the name of the service in the Eureka Server.
+                serviceId: dl-config-server
+            # The username and password are used to access the Config Server (basic authentication) as it is now using Spring Security.
+            username: admin
+            password: 'admin'
 
 
 # ================================================================================================================================
