@@ -28,6 +28,7 @@ public class JwtProvider {
 
         return Jwts.parser()
                 // .setSigningKey(jwtSecret) // deprecated method
+//                .signWith(Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharset.UTF_8)), SignatureAlgorithm.HS512).build // Used by Michelli.
                 .verifyWith(getSecretKey())
                 .build()
                 .parseSignedClaims(token)
@@ -45,6 +46,7 @@ public class JwtProvider {
 
         return Jwts.parser()
                 // .setSigningKey(jwtSecret) // deprecated method
+//                .signWith(Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharset.UTF_8)), SignatureAlgorithm.HS512).build // Used by Michelli.
                 .verifyWith(getSecretKey())
                 .build()
                 .parseSignedClaims(token)
@@ -57,7 +59,7 @@ public class JwtProvider {
             //Jwts.parser().setSigningKey(jwtSecret).build().parseClaimsJws(authToken); // working with deprecated method
             Jwts.parser().verifyWith(getSecretKey()).build().parseSignedClaims(authToken);
             return true;
-        } catch (SignatureException e) {
+        } catch (SignatureException e) { // Henrique: Use SecurityException instead of SignatureException??
             log.error("Invalid JWT signature: {}", e.getMessage(), e);
         } catch (MalformedJwtException e) {
             log.error("Invalid JWT token: {}", e.getMessage(), e);

@@ -1,6 +1,7 @@
 package com.xpto.distancelearning.payment.configs.security;
 
 import com.xpto.distancelearning.payment.configs.security.jwt.AuthenticationJwtFilter;
+import jakarta.servlet.DispatcherType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,6 +10,7 @@ import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -19,12 +21,16 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 
 @Configuration
-@EnableGlobalMethodSecurity(prePostEnabled = true) // Setting global config of the authentication manager. This is used to enable the @PreAuthorize annotation.
+// @EnableGlobalMethodSecurity(prePostEnabled = true) // Setting global config of the authentication manager. This is used to enable the @PreAuthorize annotation. // Commenting this line and using the @EnableMethodSecurity annotation.
+@EnableMethodSecurity
 @EnableWebSecurity
 public class WebSecurityConfig { // henrique: Maybe the class name should be SecurityConfig
 
     @Autowired
     private AuthenticationEntryPointImpl authenticationEntryPoint;
+
+    @Autowired
+    private AccessDeniedHandlerImpl accessDeniedHandler;
 
     @Bean
     public AuthenticationJwtFilter authenticationJwtFilter() {
@@ -50,12 +56,29 @@ public class WebSecurityConfig { // henrique: Maybe the class name should be Sec
                 .build();
     }
 
+//    // This method was added by Michelli at the end of the course.
+//    // The idea is to set the role hierarchy, which means that the ADMIN role implies the INSTRUCTOR role, which implies the STUDENT role, which implies the USER role.
+//    // Henrique: I am not sure if this is necessary. I think the hierarchy is already set by the RoleHierarchyImpl class and was working properly.
+//    @Bean
+//    public DefaultMethodSecurityExpressionHandler expressionHandler() {
+//        DefaultMethodSecurityExpressionHandler expressionHandler = new DefaultMethodSecurityExpressionHandler();
+//        expressionHandler.setRoleHierarchy(roleHierarchy());
+//        return expressionHandler;
+//    }
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .exceptionHandling(exceptionHandling -> exceptionHandling.authenticationEntryPoint(authenticationEntryPoint))
+                //.exceptionHandling(exceptionHandling -> exceptionHandling.authenticationEntryPoint(authenticationEntryPoint))
+                .exceptionHandling(exceptionHandling -> exceptionHandling
+                        .authenticationEntryPoint(authenticationEntryPoint)
+                        .accessDeniedHandler(accessDeniedHandler)
+                )
                 .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
+                        // Allow users/clients (ie Postman, frontend, etc.) to access the error pages without the need of authentication.
+                        // Without this line, the user/client would need to authenticate to access the error pages and the return would be a 401 Unauthorized error.
+                        .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                         .anyRequest().authenticated()
                 )
                 .csrf(csrf -> csrf.disable());
